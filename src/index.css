@@ -2,57 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Fashion-forward wardrobe design system */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Fashion-inspired color palette */
+    --background: 0 0% 99%;
+    --foreground: 225 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 225 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 225 15% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Sophisticated fashion primary - deep charcoal */
+    --primary: 225 15% 15%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Warm neutral secondary */
+    --secondary: 35 20% 95%;
+    --secondary-foreground: 225 15% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Soft muted tones */
+    --muted: 35 12% 92%;
+    --muted-foreground: 225 8% 55%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Fashion accent - warm blush */
+    --accent: 345 40% 88%;
+    --accent-foreground: 225 15% 15%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 35 12% 88%;
+    --input: 35 12% 88%;
+    --ring: 225 15% 15%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Fashion-specific colors */
+    --fashion-rose: 345 60% 70%;
+    --fashion-sage: 140 20% 70%;
+    --fashion-cream: 35 40% 92%;
+    --fashion-charcoal: 225 15% 25%;
+    --fashion-gold: 45 60% 75%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(345 40% 88%), hsl(35 40% 92%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(35 20% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(345 60% 70%), hsl(45 60% 75%));
 
-    --sidebar-primary: 240 5.9% 10%;
+    /* Shadows */
+    --shadow-soft: 0 2px 8px -2px hsl(225 15% 15% / 0.05);
+    --shadow-medium: 0 4px 16px -4px hsl(225 15% 15% / 0.1);
+    --shadow-strong: 0 8px 32px -8px hsl(225 15% 15% / 0.15);
 
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Animation variables */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-spring: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .dark {
@@ -100,6 +108,66 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+@layer components {
+  /* Hero variants */
+  .btn-hero {
+    @apply bg-gradient-to-r from-fashion-rose to-fashion-gold text-white font-medium shadow-medium hover:shadow-strong transition-all duration-300 hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary border border-border hover:bg-accent text-secondary-foreground shadow-soft hover:shadow-medium transition-all duration-300;
+  }
+
+  /* Card variants */
+  .card-fashion {
+    @apply bg-gradient-to-b from-card to-fashion-cream border border-border shadow-soft hover:shadow-medium transition-all duration-300;
+  }
+
+  .card-clothing {
+    @apply bg-card border border-border rounded-xl shadow-soft hover:shadow-medium transition-all duration-300 overflow-hidden group;
+  }
+
+  /* Text styles */
+  .text-gradient {
+    @apply bg-gradient-to-r from-fashion-rose to-fashion-gold bg-clip-text text-transparent;
+  }
+
+  /* Animations */
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.4s ease-out forwards;
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-2;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
