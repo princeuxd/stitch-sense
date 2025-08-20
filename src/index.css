@@ -128,7 +128,7 @@
   }
 
   .card-clothing {
-    @apply bg-card border border-border rounded-xl shadow-soft hover:shadow-medium transition-all duration-300 overflow-hidden group;
+    @apply bg-card border border-border rounded-xl shadow-soft hover:shadow-medium transition-all duration-300 overflow-hidden;
   }
 
   /* Text styles */
