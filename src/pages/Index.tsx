@@ -1,17 +1,41 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { HeroSection } from "@/components/HeroSection";
+import { Button } from "@/components/ui/button";
 import { WardrobeGrid } from "@/components/WardrobeGrid";
 import { ChatInterface } from "@/components/ChatInterface";
-import { Shirt, MessageSquare, Sparkles } from "lucide-react";
+import { OutfitGrid } from "@/components/OutfitGrid";
+import { useAuth } from "@/hooks/useAuth";
+import { Shirt, MessageSquare, Sparkles, LogOut, User } from "lucide-react";
 
 const Index = () => {
+  const { user, signOut } = useAuth();
   const [activeTab, setActiveTab] = useState("wardrobe");
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <HeroSection />
+      {/* Header */}
+      <header className="bg-white border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                <Shirt className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-xl font-bold text-gradient">StyleSync</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="w-4 h-4" />
+                {user?.email}
+              </div>
+              <Button variant="outline" size="sm" onClick={signOut}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -58,16 +82,7 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="outfits" className="mt-0">
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">✨</div>
-                <h2 className="text-2xl font-bold mb-2">Saved Outfits</h2>
-                <p className="text-muted-foreground mb-6">
-                  Create and save outfit combinations for easy access
-                </p>
-                <div className="text-sm text-muted-foreground">
-                  This feature will be available once you connect to Supabase for data storage
-                </div>
-              </div>
+              <OutfitGrid />
             </TabsContent>
           </div>
         </Tabs>
