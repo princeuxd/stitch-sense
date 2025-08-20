@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ClothingCard } from "./ClothingCard";
+import { AddClothingDialog } from "./AddClothingDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -10,48 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, Plus, Grid, List } from "lucide-react";
+import { Search, Filter, Plus, Grid, List, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useClothingItems } from "@/hooks/useClothingItems";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Sample data
-const sampleItems = [
-  {
-    id: "1",
-    name: "Classic White Blouse",
-    category: "Tops",
-    brand: "Everlane",
-    colors: ["#FFFFFF", "#F5F5F5"],
-    imageUrl: "/src/assets/sample-blouse.jpg",
-    wearCount: 12,
-    favorite: true,
-    occasions: ["Business", "Casual"],
-    lastWorn: new Date("2024-01-15"),
-  },
-  {
-    id: "2",
-    name: "Little Black Dress",
-    category: "Dresses",
-    brand: "Theory",
-    colors: ["#000000"],
-    imageUrl: "/src/assets/sample-dress.jpg",
-    wearCount: 8,
-    favorite: false,
-    occasions: ["Formal", "Date Night"],
-    lastWorn: new Date("2024-01-10"),
-  },
-  {
-    id: "3",
-    name: "Dark Wash Jeans",
-    category: "Bottoms",
-    brand: "Levi's",
-    colors: ["#1a1a2e", "#16213e"],
-    imageUrl: "/src/assets/sample-jeans.jpg",
-    wearCount: 25,
-    favorite: true,
-    occasions: ["Casual", "Weekend"],
-    lastWorn: new Date("2024-01-20"),
-  },
-];
+// Category mapping for display
+const categoryDisplayMap: Record<string, string> = {
+  tops: "Tops",
+  bottoms: "Bottoms", 
+  dresses: "Dresses",
+  outerwear: "Outerwear",
+  shoes: "Shoes",
+  accessories: "Accessories"
+};
 
 const categories = ["All", "Tops", "Bottoms", "Dresses", "Outerwear", "Shoes", "Accessories"];
 const sortOptions = [
@@ -66,13 +39,7 @@ export function WardrobeGrid() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [items, setItems] = useState(sampleItems);
-
-  const handleToggleFavorite = (id: string) => {
-    setItems(items.map(item => 
-      item.id === id ? { ...item, favorite: !item.favorite } : item
-    ));
-  };
+  const { items, loading, error, fetchItems, toggleFavorite, incrementWearCount, deleteItem } = useClothingItems();
 
   const handleAddToOutfit = (id: string) => {
     console.log("Add to outfit:", id);
@@ -85,8 +52,23 @@ export function WardrobeGrid() {
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+    const matchesCategory = selectedCategory === "All" || categoryDisplayMap[item.category] === selectedCategory;
     return matchesSearch && matchesCategory;
+  });
+
+  // Sort items based on selected sort option
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    switch (sortBy) {
+      case "worn-most":
+        return b.wear_count - a.wear_count;
+      case "worn-least":
+        return a.wear_count - b.wear_count;
+      case "name":
+        return a.name.localeCompare(b.name);
+      case "recent":
+      default:
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
   });
 
   return (
@@ -96,13 +78,10 @@ export function WardrobeGrid() {
         <div>
           <h1 className="text-3xl font-bold text-gradient">My Wardrobe</h1>
           <p className="text-muted-foreground">
-            {filteredItems.length} items • {items.filter(i => i.favorite).length} favorites
+            {loading ? "Loading..." : `${sortedItems.length} items • ${items.filter(i => i.favorite).length} favorites`}
           </p>
         </div>
-        <Button className="btn-hero">
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Item
-        </Button>
+        <AddClothingDialog onItemAdded={fetchItems} />
       </div>
 
       {/* Search and Filters */}
@@ -174,22 +153,37 @@ export function WardrobeGrid() {
         </div>
       </Card>
 
-      {/* Results */}
-      {filteredItems.length === 0 ? (
-        <Card className="card-fashion p-12 text-center">
-          <div className="space-y-4">
-            <div className="text-6xl">👗</div>
-            <h3 className="text-xl font-semibold">No items found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your search or filters, or add some new items to your wardrobe.
-            </p>
-            <Button className="btn-hero">
-              <Plus className="h-4 w-4 mr-2" />
-              Add First Item
-            </Button>
+      {/* Error State */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading your wardrobe...</span>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && items.length === 0 && (
+        <div className="text-center py-12">
+          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+            <Plus className="w-12 h-12 text-muted-foreground" />
           </div>
-        </Card>
-      ) : (
+          <h3 className="text-lg font-semibold mb-2">Your wardrobe is empty</h3>
+          <p className="text-muted-foreground mb-4">
+            Start building your digital wardrobe by adding your first clothing item.
+          </p>
+          <AddClothingDialog onItemAdded={fetchItems} />
+        </div>
+      )}
+
+      {/* Items Grid */}
+      {!loading && !error && sortedItems.length > 0 && (
         <div 
           className={
             viewMode === "grid" 
@@ -197,20 +191,44 @@ export function WardrobeGrid() {
               : "space-y-4"
           }
         >
-          {filteredItems.map((item, index) => (
+          {sortedItems.map((item, index) => (
             <div
               key={item.id}
               className="animate-fade-up"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <ClothingCard
-                item={item}
-                onToggleFavorite={handleToggleFavorite}
+                item={{
+                  id: item.id,
+                  name: item.name,
+                  category: categoryDisplayMap[item.category] || item.category,
+                  brand: item.brand,
+                  colors: [item.color_primary, item.color_secondary].filter(Boolean),
+                  imageUrl: item.front_image_url || '/placeholder-clothing.svg',
+                  wearCount: item.wear_count,
+                  favorite: item.favorite,
+                  occasions: item.occasions,
+                  lastWorn: item.last_worn ? new Date(item.last_worn) : undefined,
+                }}
+                onToggleFavorite={toggleFavorite}
                 onAddToOutfit={handleAddToOutfit}
                 onView={handleView}
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {/* No Results State */}
+      {!loading && !error && items.length > 0 && sortedItems.length === 0 && (
+        <div className="text-center py-12">
+          <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+            <Search className="w-12 h-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No items found</h3>
+          <p className="text-muted-foreground">
+            Try adjusting your search or filter criteria.
+          </p>
         </div>
       )}
     </div>

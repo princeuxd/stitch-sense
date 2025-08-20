@@ -102,6 +102,7 @@ export const ImageUploader = ({
 
         if (error) throw error;
 
+        // Store the full path for later signed URL generation
         const { data: { publicUrl } } = supabase.storage
           .from('clothing-images')
           .getPublicUrl(data.path);

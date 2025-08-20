@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { WardrobeGrid } from "@/components/WardrobeGrid";
 import { ChatInterface } from "@/components/ChatInterface";
 import { OutfitGrid } from "@/components/OutfitGrid";
+import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
 import { useAuth } from "@/hooks/useAuth";
-import { Shirt, MessageSquare, Sparkles, LogOut, User } from "lucide-react";
+import { Shirt, MessageSquare, Sparkles, LogOut, User, Database } from "lucide-react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -40,7 +41,7 @@ const Index = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto bg-muted rounded-xl p-1">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto bg-muted rounded-xl p-1">
             <TabsTrigger 
               value="wardrobe" 
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-soft"
@@ -61,6 +62,13 @@ const Index = () => {
             >
               <Sparkles className="h-4 w-4" />
               Outfits
+            </TabsTrigger>
+            <TabsTrigger 
+              value="connection" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-soft"
+            >
+              <Database className="h-4 w-4" />
+              Connection
             </TabsTrigger>
           </TabsList>
 
@@ -83,6 +91,18 @@ const Index = () => {
 
             <TabsContent value="outfits" className="mt-0">
               <OutfitGrid />
+            </TabsContent>
+
+            <TabsContent value="connection" className="mt-0">
+              <div className="flex flex-col items-center space-y-6">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-gradient mb-2">Supabase Connection Test</h2>
+                  <p className="text-muted-foreground">
+                    Test and verify Supabase connection status
+                  </p>
+                </div>
+                <SupabaseConnectionTest />
+              </div>
             </TabsContent>
           </div>
         </Tabs>
