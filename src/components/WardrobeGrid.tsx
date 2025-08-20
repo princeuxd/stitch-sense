@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { ClothingCard } from "./ClothingCard";
 import { AddClothingDialog } from "./AddClothingDialog";
+import { EditClothingDialog } from "./EditClothingDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +40,7 @@ export function WardrobeGrid() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [editingItem, setEditingItem] = useState<any>(null);
   const { items, loading, error, fetchItems, toggleFavorite, incrementWearCount, deleteItem } = useClothingItems();
 
   const handleAddToOutfit = (id: string) => {
@@ -47,6 +49,19 @@ export function WardrobeGrid() {
 
   const handleView = (id: string) => {
     console.log("View item:", id);
+  };
+
+  const handleEdit = (id: string) => {
+    const item = items.find(item => item.id === id);
+    if (item) {
+      setEditingItem(item);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this item?")) {
+      await deleteItem(id);
+    }
   };
 
   const filteredItems = items.filter(item => {
@@ -213,6 +228,8 @@ export function WardrobeGrid() {
                 onToggleFavorite={toggleFavorite}
                 onAddToOutfit={handleAddToOutfit}
                 onView={handleView}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
               />
             </div>
           ))}
@@ -231,6 +248,23 @@ export function WardrobeGrid() {
           </p>
         </div>
       )}
+
+      {/* Edit Dialog */}
+       {editingItem && (
+         <EditClothingDialog
+           item={editingItem}
+           isOpen={!!editingItem}
+           onOpenChange={(open) => {
+             if (!open) {
+               setEditingItem(null);
+             }
+           }}
+           onItemUpdated={() => {
+             fetchItems();
+             setEditingItem(null);
+           }}
+         />
+       )}
     </div>
   );
 }

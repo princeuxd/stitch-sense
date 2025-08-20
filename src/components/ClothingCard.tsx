@@ -27,9 +27,11 @@ interface ClothingCardProps {
   onToggleFavorite: (id: string) => void;
   onAddToOutfit: (id: string) => void;
   onView: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView }: ClothingCardProps) {
+export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, onEdit, onDelete }: ClothingCardProps) {
   return (
     <Card className="card-clothing hover-lift group">
       <div className="relative aspect-square overflow-hidden">
@@ -99,9 +101,13 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView }: 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover">
-              <DropdownMenuItem>Edit Item</DropdownMenuItem>
-              <DropdownMenuItem>Add to Outfit</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(item.id)}>Edit Item</DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={() => onAddToOutfit(item.id)}>Add to Outfit</DropdownMenuItem>
+              {onDelete && (
+                <DropdownMenuItem className="text-destructive" onClick={() => onDelete(item.id)}>Delete</DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
