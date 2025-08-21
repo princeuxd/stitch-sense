@@ -1,4 +1,4 @@
-import { Heart, Eye, Plus, MoreVertical } from "lucide-react";
+import { Heart, Eye, MoreVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,13 +25,20 @@ interface ClothingItem {
 interface ClothingCardProps {
   item: ClothingItem;
   onToggleFavorite: (id: string) => void;
-  onAddToOutfit: (id: string) => void;
   onView: (id: string) => void;
+  onAddToOutfit?: (id: string) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
 
-export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, onEdit, onDelete }: ClothingCardProps) {
+export function ClothingCard({
+  item,
+  onToggleFavorite,
+  onAddToOutfit,
+  onView,
+  onEdit,
+  onDelete,
+}: ClothingCardProps) {
   return (
     <Card className="card-clothing hover-lift group">
       <div className="relative aspect-square overflow-hidden">
@@ -40,7 +47,7 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, on
           alt={item.name}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        
+
         {/* Action overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
           <div className="flex gap-2">
@@ -52,13 +59,6 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, on
             >
               <Eye className="h-4 w-4" />
             </Button>
-            <Button
-              size="sm"
-              onClick={() => onAddToOutfit(item.id)}
-              className="btn-hero"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
@@ -68,8 +68,8 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, on
           variant="ghost"
           onClick={() => onToggleFavorite(item.id)}
           className={`absolute top-3 right-3 rounded-full p-2 transition-colors duration-300 ${
-            item.favorite 
-              ? "bg-fashion-rose/90 text-white hover:bg-fashion-rose" 
+            item.favorite
+              ? "bg-fashion-rose/90 text-white hover:bg-fashion-rose"
               : "bg-white/90 text-muted-foreground hover:bg-white hover:text-fashion-rose"
           }`}
         >
@@ -77,8 +77,8 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, on
         </Button>
 
         {/* Category badge */}
-        <Badge 
-          variant="secondary" 
+        <Badge
+          variant="secondary"
           className="absolute top-3 left-3 bg-white/90 text-primary shadow-soft"
         >
           {item.category}
@@ -93,7 +93,7 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, on
               <p className="text-muted-foreground text-sm">{item.brand}</p>
             )}
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -102,11 +102,22 @@ export function ClothingCard({ item, onToggleFavorite, onAddToOutfit, onView, on
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-popover">
               {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(item.id)}>Edit Item</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onEdit(item.id)}>
+                  Edit Item
+                </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={() => onAddToOutfit(item.id)}>Add to Outfit</DropdownMenuItem>
+              {onAddToOutfit && (
+                <DropdownMenuItem onClick={() => onAddToOutfit(item.id)}>
+                  Add to Outfit
+                </DropdownMenuItem>
+              )}
               {onDelete && (
-                <DropdownMenuItem className="text-destructive" onClick={() => onDelete(item.id)}>Delete</DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => onDelete(item.id)}
+                >
+                  Delete
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

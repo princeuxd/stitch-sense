@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/use-toast';
@@ -39,7 +39,7 @@ export const useClothingItems = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     if (!user) {
       setItems([]);
       setLoading(false);
@@ -102,7 +102,7 @@ export const useClothingItems = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const toggleFavorite = async (itemId: string) => {
     try {
@@ -200,7 +200,7 @@ export const useClothingItems = () => {
 
   useEffect(() => {
     fetchItems();
-  }, [user]);
+  }, [user, fetchItems]);
 
   return {
     items,

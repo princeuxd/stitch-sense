@@ -20,14 +20,22 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 // Category mapping for display
 const categoryDisplayMap: Record<string, string> = {
   tops: "Tops",
-  bottoms: "Bottoms", 
+  bottoms: "Bottoms",
   dresses: "Dresses",
   outerwear: "Outerwear",
   shoes: "Shoes",
-  accessories: "Accessories"
+  accessories: "Accessories",
 };
 
-const categories = ["All", "Tops", "Bottoms", "Dresses", "Outerwear", "Shoes", "Accessories"];
+const categories = [
+  "All",
+  "Tops",
+  "Bottoms",
+  "Dresses",
+  "Outerwear",
+  "Shoes",
+  "Accessories",
+];
 const sortOptions = [
   { value: "recent", label: "Recently Added" },
   { value: "worn-most", label: "Most Worn" },
@@ -41,18 +49,26 @@ export function WardrobeGrid() {
   const [sortBy, setSortBy] = useState("recent");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [editingItem, setEditingItem] = useState<any>(null);
-  const { items, loading, error, fetchItems, toggleFavorite, incrementWearCount, deleteItem } = useClothingItems();
-
-  const handleAddToOutfit = (id: string) => {
-    console.log("Add to outfit:", id);
-  };
+  const [viewingItem, setViewingItem] = useState<any>(null);
+  const {
+    items,
+    loading,
+    error,
+    fetchItems,
+    toggleFavorite,
+    incrementWearCount,
+    deleteItem,
+  } = useClothingItems();
 
   const handleView = (id: string) => {
-    console.log("View item:", id);
+    const item = items.find((item) => item.id === id);
+    if (item) {
+      setViewingItem(item);
+    }
   };
 
   const handleEdit = (id: string) => {
-    const item = items.find(item => item.id === id);
+    const item = items.find((item) => item.id === id);
     if (item) {
       setEditingItem(item);
     }
@@ -64,10 +80,13 @@ export function WardrobeGrid() {
     }
   };
 
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || categoryDisplayMap[item.category] === selectedCategory;
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.brand?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" ||
+      categoryDisplayMap[item.category] === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -82,7 +101,9 @@ export function WardrobeGrid() {
         return a.name.localeCompare(b.name);
       case "recent":
       default:
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
     }
   });
 
@@ -93,7 +114,11 @@ export function WardrobeGrid() {
         <div>
           <h1 className="text-3xl font-bold text-gradient">My Wardrobe</h1>
           <p className="text-muted-foreground">
-            {loading ? "Loading..." : `${sortedItems.length} items • ${items.filter(i => i.favorite).length} favorites`}
+            {loading
+              ? "Loading..."
+              : `${sortedItems.length} items • ${
+                  items.filter((i) => i.favorite).length
+                } favorites`}
           </p>
         </div>
         <AddClothingDialog onItemAdded={fetchItems} />
@@ -120,8 +145,8 @@ export function WardrobeGrid() {
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 className={`cursor-pointer transition-colors ${
-                  selectedCategory === category 
-                    ? "bg-gradient-accent text-white shadow-medium" 
+                  selectedCategory === category
+                    ? "bg-gradient-accent text-white shadow-medium"
                     : "hover:bg-accent"
                 }`}
                 onClick={() => setSelectedCategory(category)}
@@ -191,7 +216,8 @@ export function WardrobeGrid() {
           </div>
           <h3 className="text-lg font-semibold mb-2">Your wardrobe is empty</h3>
           <p className="text-muted-foreground mb-4">
-            Start building your digital wardrobe by adding your first clothing item.
+            Start building your digital wardrobe by adding your first clothing
+            item.
           </p>
           <AddClothingDialog onItemAdded={fetchItems} />
         </div>
@@ -199,10 +225,10 @@ export function WardrobeGrid() {
 
       {/* Items Grid */}
       {!loading && !error && sortedItems.length > 0 && (
-        <div 
+        <div
           className={
-            viewMode === "grid" 
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+            viewMode === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               : "space-y-4"
           }
         >
@@ -218,15 +244,18 @@ export function WardrobeGrid() {
                   name: item.name,
                   category: categoryDisplayMap[item.category] || item.category,
                   brand: item.brand,
-                  colors: [item.color_primary, item.color_secondary].filter(Boolean),
-                  imageUrl: item.front_image_url || '/placeholder-clothing.svg',
+                  colors: [item.color_primary, item.color_secondary].filter(
+                    Boolean
+                  ),
+                  imageUrl: item.front_image_url || "/placeholder-clothing.svg",
                   wearCount: item.wear_count,
                   favorite: item.favorite,
                   occasions: item.occasions,
-                  lastWorn: item.last_worn ? new Date(item.last_worn) : undefined,
+                  lastWorn: item.last_worn
+                    ? new Date(item.last_worn)
+                    : undefined,
                 }}
                 onToggleFavorite={toggleFavorite}
-                onAddToOutfit={handleAddToOutfit}
                 onView={handleView}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
@@ -250,21 +279,141 @@ export function WardrobeGrid() {
       )}
 
       {/* Edit Dialog */}
-       {editingItem && (
-         <EditClothingDialog
-           item={editingItem}
-           isOpen={!!editingItem}
-           onOpenChange={(open) => {
-             if (!open) {
-               setEditingItem(null);
-             }
-           }}
-           onItemUpdated={() => {
-             fetchItems();
-             setEditingItem(null);
-           }}
-         />
-       )}
+      {editingItem && (
+        <EditClothingDialog
+          item={editingItem}
+          isOpen={!!editingItem}
+          onOpenChange={(open) => {
+            if (!open) {
+              setEditingItem(null);
+            }
+          }}
+          onItemUpdated={() => {
+            fetchItems();
+            setEditingItem(null);
+          }}
+        />
+      )}
+
+      {/* View Item Dialog */}
+      {viewingItem && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <h2 className="text-2xl font-bold">{viewingItem.name}</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setViewingItem(null)}
+                >
+                  ✕
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={
+                        viewingItem.front_image_url ||
+                        "/placeholder-clothing.svg"
+                      }
+                      alt={viewingItem.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  {viewingItem.back_image_url && (
+                    <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                      <img
+                        src={viewingItem.back_image_url}
+                        alt={`${viewingItem.name} - Back`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="font-semibold mb-2">Details</h3>
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <strong>Category:</strong>{" "}
+                        {categoryDisplayMap[viewingItem.category] ||
+                          viewingItem.category}
+                      </div>
+                      {viewingItem.brand && (
+                        <div>
+                          <strong>Brand:</strong> {viewingItem.brand}
+                        </div>
+                      )}
+                      {viewingItem.color_primary && (
+                        <div>
+                          <strong>Color:</strong> {viewingItem.color_primary}
+                        </div>
+                      )}
+                      <div>
+                        <strong>Times Worn:</strong> {viewingItem.wear_count}
+                      </div>
+                      {viewingItem.last_worn && (
+                        <div>
+                          <strong>Last Worn:</strong>{" "}
+                          {new Date(viewingItem.last_worn).toLocaleDateString()}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {viewingItem.occasions &&
+                    viewingItem.occasions.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-2">Occasions</h3>
+                        <div className="flex flex-wrap gap-1">
+                          {viewingItem.occasions.map((occasion: string) => (
+                            <Badge
+                              key={occasion}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {occasion}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                  {viewingItem.season && viewingItem.season.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Seasons</h3>
+                      <div className="flex flex-wrap gap-1">
+                        {viewingItem.season.map((season: string) => (
+                          <Badge
+                            key={season}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {season}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {viewingItem.notes && (
+                    <div>
+                      <h3 className="font-semibold mb-2">Notes</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {viewingItem.notes}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

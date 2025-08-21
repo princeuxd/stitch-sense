@@ -5,8 +5,16 @@ import { WardrobeGrid } from "@/components/WardrobeGrid";
 import { ChatInterface } from "@/components/ChatInterface";
 import { OutfitGrid } from "@/components/OutfitGrid";
 import { SupabaseConnectionTest } from "@/components/SupabaseConnectionTest";
+
 import { useAuth } from "@/hooks/useAuth";
-import { Shirt, MessageSquare, Sparkles, LogOut, User, Database } from "lucide-react";
+import {
+  Shirt,
+  MessageSquare,
+  Sparkles,
+  LogOut,
+  User,
+  Database,
+} from "lucide-react";
 
 const Index = () => {
   const { user, signOut } = useAuth();
@@ -42,29 +50,29 @@ const Index = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto bg-muted rounded-xl p-1">
-            <TabsTrigger 
-              value="wardrobe" 
+            <TabsTrigger
+              value="wardrobe"
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-soft"
             >
               <Shirt className="h-4 w-4" />
               Wardrobe
             </TabsTrigger>
-            <TabsTrigger 
-              value="chat" 
+            <TabsTrigger
+              value="chat"
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-soft"
             >
               <MessageSquare className="h-4 w-4" />
               AI Stylist
             </TabsTrigger>
-            <TabsTrigger 
-              value="outfits" 
+            <TabsTrigger
+              value="outfits"
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-soft"
             >
               <Sparkles className="h-4 w-4" />
               Outfits
             </TabsTrigger>
-            <TabsTrigger 
-              value="connection" 
+            <TabsTrigger
+              value="connection"
               className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-soft"
             >
               <Database className="h-4 w-4" />
@@ -80,7 +88,9 @@ const Index = () => {
             <TabsContent value="chat" className="mt-0">
               <div className="flex flex-col items-center space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gradient mb-2">AI Style Assistant</h2>
+                  <h2 className="text-2xl font-bold text-gradient mb-2">
+                    AI Style Assistant
+                  </h2>
                   <p className="text-muted-foreground">
                     Get personalized outfit recommendations and styling advice
                   </p>
@@ -96,7 +106,9 @@ const Index = () => {
             <TabsContent value="connection" className="mt-0">
               <div className="flex flex-col items-center space-y-6">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-gradient mb-2">Supabase Connection Test</h2>
+                  <h2 className="text-2xl font-bold text-gradient mb-2">
+                    Supabase Connection Test
+                  </h2>
                   <p className="text-muted-foreground">
                     Test and verify Supabase connection status
                   </p>
