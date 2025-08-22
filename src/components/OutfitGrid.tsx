@@ -30,12 +30,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+// We reuse AddOutfitDialog in edit mode as a full-screen editor
 
 export const OutfitGrid = () => {
   const { outfits, loading, fetchOutfits, deleteOutfit, incrementWearCount } =
     useOutfits();
   const [selectedOutfit, setSelectedOutfit] = useState<Outfit | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [editingOutfit, setEditingOutfit] = useState<Outfit | null>(null);
 
   const getItemsByCategory = (outfit: Outfit, category: string) => {
     return outfit.outfit_items
@@ -170,7 +172,9 @@ export const OutfitGrid = () => {
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setEditingOutfit(outfit)}
+                        >
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
@@ -197,7 +201,7 @@ export const OutfitGrid = () => {
                           <img
                             src={item.clothing_items.front_image_url}
                             alt={item.clothing_items.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover safari-img"
                             onError={(e) => {
                               // Fallback to placeholder if image fails to load
                               const target = e.target as HTMLImageElement;
@@ -339,7 +343,7 @@ export const OutfitGrid = () => {
                             <img
                               src={item.clothing_items.front_image_url}
                               alt={item.clothing_items.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover safari-img"
                               onError={(e) => {
                                 // Fallback to placeholder if image fails to load
                                 const target = e.target as HTMLImageElement;
@@ -409,6 +413,32 @@ export const OutfitGrid = () => {
                         <Eye className="w-3 h-3 mr-1" />
                         View
                       </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => setEditingOutfit(outfit)}
+                          >
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => deleteOutfit(outfit.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </CardContent>
@@ -452,7 +482,7 @@ export const OutfitGrid = () => {
                               <img
                                 src={item.clothing_items.front_image_url}
                                 alt={item.clothing_items.name}
-                                className="w-full h-full object-cover"
+                                className="w-full h-full object-cover safari-img"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
                                   target.style.display = "none";
@@ -495,7 +525,7 @@ export const OutfitGrid = () => {
                                 <img
                                   src={item.front_image_url}
                                   alt={item.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover safari-img"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = "none";
@@ -537,7 +567,7 @@ export const OutfitGrid = () => {
                                 <img
                                   src={item.front_image_url}
                                   alt={item.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover safari-img"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = "none";
@@ -579,7 +609,7 @@ export const OutfitGrid = () => {
                                 <img
                                   src={item.front_image_url}
                                   alt={item.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover safari-img"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement;
                                     target.style.display = "none";
@@ -646,6 +676,22 @@ export const OutfitGrid = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Edit Outfit Dialog (full editor) */}
+      {editingOutfit && (
+        <AddOutfitDialog
+          mode="edit"
+          initialOutfit={editingOutfit as any}
+          startOpen
+          hideTrigger
+          onSaved={() => {
+            fetchOutfits();
+            setEditingOutfit(null);
+          }}
+          onClosed={() => setEditingOutfit(null)}
+          onOutfitAdded={fetchOutfits}
+        />
+      )}
     </div>
   );
 };

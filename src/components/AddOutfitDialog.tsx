@@ -46,9 +46,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+interface OutfitForEditItemRef {
+  clothing_items: { id: string };
+}
+interface OutfitForEdit {
+  id: string;
+  name: string;
+  occasion: string | null;
+  season: string[];
+  notes: string | null;
+  rating: number | null;
+  outfit_items?: OutfitForEditItemRef[]; // when passed from list view
+}
+
 interface AddOutfitDialogProps {
-  onOutfitAdded: () => void;
-  preSelectedItems?: string[];
+  onOutfitAdded: () => void; // used for create (and kept for backward compat)
+  preSelectedItems?: string[]; // used when creating from wardrobe
+  // Edit-mode additions
+  mode?: "create" | "edit";
+  initialOutfit?: OutfitForEdit;
+  startOpen?: boolean; // open immediately (useful for edit)
+  hideTrigger?: boolean; // hide the built-in Create button
+  onSaved?: () => void; // callback after successful save (edit or create)
+  onClosed?: () => void; // notify parent when dialog is closed (cancel/save)
 }
 
 interface OutfitFormData {
@@ -74,10 +94,16 @@ const seasons = ["Spring", "Summer", "Fall", "Winter"];
 export const AddOutfitDialog = ({
   onOutfitAdded,
   preSelectedItems = [],
+  mode = "create",
+  initialOutfit,
+  startOpen,
+  hideTrigger,
+  onSaved,
+  onClosed,
 }: AddOutfitDialogProps) => {
   const { user } = useAuth();
   const { items: clothingItems } = useClothingItems(); // Removed fetchItems since it's not needed
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!startOpen);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("tops");
   const [showPreview, setShowPreview] = useState(true);
@@ -91,15 +117,32 @@ export const AddOutfitDialog = ({
     selectedItems: [],
   });
 
-  // Initialize form with pre-selected items
+  // Initialize for create-from-wardrobe (preSelectedItems)
   useEffect(() => {
-    if (preSelectedItems.length > 0) {
+    if (mode === "create" && preSelectedItems.length > 0) {
       setFormData((prev) => ({
         ...prev,
         selectedItems: preSelectedItems,
       }));
     }
-  }, [preSelectedItems]);
+  }, [preSelectedItems, mode]);
+
+  // Initialize edit mode from initialOutfit
+  useEffect(() => {
+    if (mode === "edit" && initialOutfit) {
+      setFormData({
+        name: initialOutfit.name || "",
+        occasion: initialOutfit.occasion || "",
+        season: initialOutfit.season || [],
+        notes: initialOutfit.notes || "",
+        rating: initialOutfit.rating ? String(initialOutfit.rating) : "",
+        selectedItems:
+          (initialOutfit.outfit_items || []).map(
+            (oi) => oi.clothing_items.id
+          ) || [],
+      });
+    }
+  }, [mode, initialOutfit]);
 
   const handleInputChange = (field: keyof OutfitFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -125,7 +168,6 @@ export const AddOutfitDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted!", formData);
 
     if (!formData.name || formData.selectedItems.length === 0) {
       toast({
@@ -144,54 +186,111 @@ export const AddOutfitDialog = ({
         throw new Error("User not authenticated");
       }
 
-      // Create the outfit
-      const { data: outfit, error: outfitError } = await supabase
-        .from("outfits")
-        .insert({
-          user_id: user.id,
-          name: formData.name,
-          occasion: formData.occasion || null,
-          season: formData.season,
-          notes: formData.notes || null,
-          rating: formData.rating ? parseInt(formData.rating) : null,
-        })
-        .select()
-        .single();
+      if (mode === "create") {
+        // Create the outfit
+        const { data: outfit, error: outfitError } = await supabase
+          .from("outfits")
+          .insert({
+            user_id: user.id,
+            name: formData.name,
+            occasion: formData.occasion || null,
+            season: formData.season,
+            notes: formData.notes || null,
+            rating: formData.rating ? parseInt(formData.rating) : null,
+          })
+          .select()
+          .single();
 
-      if (outfitError) throw outfitError;
+        if (outfitError) throw outfitError;
 
-      // Add outfit items
-      const outfitItems = formData.selectedItems.map((itemId) => ({
-        outfit_id: outfit.id,
-        item_id: itemId,
-      }));
+        // Add outfit items
+        const outfitItems = formData.selectedItems.map((itemId) => ({
+          outfit_id: outfit.id,
+          item_id: itemId,
+        }));
 
-      const { error: itemsError } = await supabase
-        .from("outfit_items")
-        .insert(outfitItems);
+        const { error: itemsError } = await supabase
+          .from("outfit_items")
+          .insert(outfitItems);
 
-      if (itemsError) throw itemsError;
+        if (itemsError) throw itemsError;
 
-      toast({
-        title: "Outfit created successfully!",
-        description: "Your new outfit has been added to your collection.",
-      });
+        toast({
+          title: "Outfit created successfully!",
+          description: "Your new outfit has been added to your collection.",
+        });
+      } else {
+        // Edit existing outfit
+        if (!initialOutfit) throw new Error("Missing outfit to edit");
 
-      // Reset form
-      setFormData({
-        name: "",
-        occasion: "",
-        season: [],
-        notes: "",
-        rating: "",
-        selectedItems: [],
-      });
+        // Update main outfit
+        const { error: updateError } = await supabase
+          .from("outfits")
+          .update({
+            name: formData.name,
+            occasion: formData.occasion || null,
+            season: formData.season,
+            notes: formData.notes || null,
+            rating: formData.rating ? parseInt(formData.rating) : null,
+          })
+          .eq("id", initialOutfit.id);
+
+        if (updateError) throw updateError;
+
+        // Diff outfit items
+        const originalIds = new Set(
+          (initialOutfit.outfit_items || []).map((oi) => oi.clothing_items.id)
+        );
+        const currentIds = new Set(formData.selectedItems);
+
+        const toAdd: string[] = [];
+        const toRemove: string[] = [];
+
+        // items to add
+        formData.selectedItems.forEach((id) => {
+          if (!originalIds.has(id)) toAdd.push(id);
+        });
+        // items to remove
+        (initialOutfit.outfit_items || []).forEach((oi) => {
+          const id = oi.clothing_items.id;
+          if (!currentIds.has(id)) toRemove.push(id);
+        });
+
+        if (toAdd.length > 0) {
+          const addRows = toAdd.map((itemId) => ({
+            outfit_id: initialOutfit.id,
+            item_id: itemId,
+          }));
+          const { error: addErr } = await supabase
+            .from("outfit_items")
+            .insert(addRows);
+          if (addErr) throw addErr;
+        }
+
+        if (toRemove.length > 0) {
+          const { error: delErr } = await supabase
+            .from("outfit_items")
+            .delete()
+            .eq("outfit_id", initialOutfit.id)
+            .in("item_id", toRemove);
+          if (delErr) throw delErr;
+        }
+
+        toast({ title: "Outfit updated" });
+      }
+
+      // Close and notify
       setOpen(false);
-      onOutfitAdded();
+      if (onSaved) onSaved();
+      else onOutfitAdded();
+      if (onClosed) onClosed();
     } catch (error) {
       console.error("Error creating outfit:", error);
       toast({
-        title: "Failed to create outfit",
+        title:
+          mode === "create"
+            ? "Failed to create outfit"
+            : "Failed to update outfit",
         description: "Please try again.",
         variant: "destructive",
       });
@@ -223,18 +322,30 @@ export const AddOutfitDialog = ({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Outfit
-          </Button>
-        </DialogTrigger>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (!v && onClosed) onClosed();
+        }}
+      >
+        {!hideTrigger && mode === "create" && (
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Outfit
+            </Button>
+          </DialogTrigger>
+        )}
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Outfit</DialogTitle>
+            <DialogTitle>
+              {mode === "create" ? "Create New Outfit" : "Edit Outfit"}
+            </DialogTitle>
             <DialogDescription>
-              Combine clothing items from your wardrobe to create a new outfit.
+              {mode === "create"
+                ? "Combine clothing items from your wardrobe to create a new outfit."
+                : "Update clothing items and details for this outfit."}
             </DialogDescription>
           </DialogHeader>
 
@@ -410,7 +521,7 @@ export const AddOutfitDialog = ({
                                           "/placeholder-clothing.svg"
                                         }
                                         alt={item.name}
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-cover safari-img"
                                         onError={(e) => {
                                           // Fallback to placeholder if image fails to load
                                           const target =
@@ -539,8 +650,8 @@ export const AddOutfitDialog = ({
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      console.log("Cancel clicked");
                       setOpen(false);
+                      if (onClosed) onClosed();
                     }}
                   >
                     Cancel
@@ -549,9 +660,14 @@ export const AddOutfitDialog = ({
                     type="submit"
                     disabled={loading || formData.selectedItems.length === 0}
                     className="min-w-[120px]"
-                    onClick={() => console.log("Submit button clicked")}
                   >
-                    {loading ? "Creating..." : "Create Outfit"}
+                    {loading
+                      ? mode === "create"
+                        ? "Creating..."
+                        : "Saving..."
+                      : mode === "create"
+                      ? "Create Outfit"
+                      : "Save Changes"}
                   </Button>
                 </div>
               </form>
@@ -602,7 +718,7 @@ export const AddOutfitDialog = ({
                                     "/placeholder-clothing.svg"
                                   }
                                   alt={item.name}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover safari-img"
                                   onError={(e) => {
                                     // Fallback to placeholder if image fails to load
                                     const target = e.target as HTMLImageElement;
@@ -713,7 +829,7 @@ export const AddOutfitDialog = ({
                           "/placeholder-clothing.svg"
                         }
                         alt={`${previewItem.name} - Front`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover safari-img"
                         onError={(e) => {
                           // Fallback to placeholder if image fails to load
                           const target = e.target as HTMLImageElement;
@@ -732,7 +848,7 @@ export const AddOutfitDialog = ({
                           "/placeholder-clothing.svg"
                         }
                         alt={`${previewItem.name} - Back`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover safari-img"
                         onError={(e) => {
                           // Fallback to placeholder if image fails to load
                           const target = e.target as HTMLImageElement;

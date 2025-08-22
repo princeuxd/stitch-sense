@@ -1,8 +1,14 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
+import { HeroSection } from "@/components/HeroSection";
 
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
@@ -34,7 +40,7 @@ function PublicRoutes() {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   return <Auth />;
@@ -45,8 +51,9 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<HeroSection />} />
           <Route path="/auth" element={<PublicRoutes />} />
-          <Route path="/" element={<ProtectedRoutes />} />
+          <Route path="/app" element={<ProtectedRoutes />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
         <Toaster />

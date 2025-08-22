@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { ProfileSettingsDialog } from "@/components/ProfileSettingsDialog";
 import { WardrobeGrid } from "@/components/WardrobeGrid";
 import { ChatInterface } from "@/components/ChatInterface";
 import { OutfitGrid } from "@/components/OutfitGrid";
@@ -33,10 +34,18 @@ const Index = () => {
               <h1 className="text-xl font-bold text-gradient">StyleSync</h1>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <User className="w-4 h-4" />
-                {user?.email}
-              </div>
+              <ProfileSettingsDialog>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <User className="w-4 h-4" />
+                  <span className="text-sm text-muted-foreground">
+                    {user?.email}
+                  </span>
+                </Button>
+              </ProfileSettingsDialog>
               <Button variant="outline" size="sm" onClick={signOut}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out

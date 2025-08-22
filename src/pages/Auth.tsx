@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,18 +28,22 @@ const Auth = () => {
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        navigate("/app");
       }
     };
 
     checkAuth();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/");
+        navigate("/app");
       }
     });
 
@@ -41,9 +51,9 @@ const Auth = () => {
   }, [navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -61,7 +71,8 @@ const Auth = () => {
         if (error.message.includes("Invalid login credentials")) {
           toast({
             title: "Login Failed",
-            description: "Invalid email or password. Please check your credentials.",
+            description:
+              "Invalid email or password. Please check your credentials.",
             variant: "destructive",
           });
         } else {
@@ -93,8 +104,8 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      
+      const redirectUrl = `${window.location.origin}/app`;
+
       const { error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -102,15 +113,16 @@ const Auth = () => {
           emailRedirectTo: redirectUrl,
           data: {
             display_name: formData.displayName,
-          }
-        }
+          },
+        },
       });
 
       if (error) {
         if (error.message.includes("User already registered")) {
           toast({
             title: "Account Exists",
-            description: "An account with this email already exists. Please sign in instead.",
+            description:
+              "An account with this email already exists. Please sign in instead.",
             variant: "destructive",
           });
         } else {
@@ -207,7 +219,11 @@ const Auth = () => {
                       </Button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full h-11" disabled={loading}>
+                  <Button
+                    type="submit"
+                    className="w-full h-11"
+                    disabled={loading}
+                  >
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
                 </form>
@@ -273,7 +289,11 @@ const Auth = () => {
                       Password must be at least 6 characters
                     </p>
                   </div>
-                  <Button type="submit" className="w-full h-11" disabled={loading}>
+                  <Button
+                    type="submit"
+                    className="w-full h-11"
+                    disabled={loading}
+                  >
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>
