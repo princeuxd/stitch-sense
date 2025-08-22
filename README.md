@@ -1,4 +1,4 @@
-# Stitch Sense
+# StyleInCheck
 
 AI-powered wardrobe assistant to catalog clothes, generate outfits, and manage your style.
 
