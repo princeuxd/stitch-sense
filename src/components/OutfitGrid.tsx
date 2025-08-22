@@ -62,7 +62,7 @@ export const OutfitGrid = () => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {[...Array(6)].map((_, i) => (
           <Card key={i} className="animate-pulse">
             <CardHeader>
@@ -102,15 +102,17 @@ export const OutfitGrid = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gradient">Your Outfits</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gradient">
+            Your Outfits
+          </h2>
           <p className="text-muted-foreground">
             {outfits.length} outfit{outfits.length !== 1 ? "s" : ""} in your
             collection
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <div className="flex items-center border rounded-lg">
             <Button
               variant={viewMode === "grid" ? "default" : "ghost"}
@@ -134,7 +136,7 @@ export const OutfitGrid = () => {
       </div>
 
       {viewMode === "grid" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {outfits.map((outfit) => {
             const stats = getOutfitStats(outfit);
 
@@ -296,7 +298,7 @@ export const OutfitGrid = () => {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-2">
+                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -331,13 +333,13 @@ export const OutfitGrid = () => {
                 className="hover:shadow-md transition-shadow"
               >
                 <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                     {/* Outfit Image */}
                     <div className="flex gap-2">
                       {outfit.outfit_items.slice(0, 2).map((item, index) => (
                         <div
                           key={index}
-                          className="w-16 h-16 rounded-lg overflow-hidden bg-muted"
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden bg-muted"
                         >
                           {item.clothing_items.front_image_url ? (
                             <img
@@ -366,7 +368,7 @@ export const OutfitGrid = () => {
                         </div>
                       ))}
                       {outfit.outfit_items.length > 2 && (
-                        <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-muted flex items-center justify-center">
                           <span className="text-sm font-medium text-muted-foreground">
                             +{outfit.outfit_items.length - 2}
                           </span>
@@ -375,9 +377,11 @@ export const OutfitGrid = () => {
                     </div>
 
                     {/* Outfit Info */}
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-[180px]">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{outfit.name}</h3>
+                        <h3 className="font-semibold truncate max-w-[220px] sm:max-w-none">
+                          {outfit.name}
+                        </h3>
                         {outfit.occasion && (
                           <Badge variant="secondary" className="text-xs">
                             {outfit.occasion}
@@ -453,7 +457,7 @@ export const OutfitGrid = () => {
         open={!!selectedOutfit}
         onOpenChange={() => setSelectedOutfit(null)}
       >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedOutfit && (
             <>
               <DialogHeader>
@@ -466,7 +470,7 @@ export const OutfitGrid = () => {
               <div className="space-y-6">
                 {/* Outfit Items by Category */}
                 <Tabs defaultValue="all" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                     <TabsTrigger value="all">All Items</TabsTrigger>
                     <TabsTrigger value="tops">Tops</TabsTrigger>
                     <TabsTrigger value="bottoms">Bottoms</TabsTrigger>
@@ -474,7 +478,7 @@ export const OutfitGrid = () => {
                   </TabsList>
 
                   <TabsContent value="all" className="mt-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                       {selectedOutfit.outfit_items.map((item, index) => (
                         <div key={index} className="space-y-2">
                           <div className="aspect-square rounded-lg overflow-hidden bg-muted">
@@ -516,7 +520,7 @@ export const OutfitGrid = () => {
                   </TabsContent>
 
                   <TabsContent value="tops" className="mt-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                       {getItemsByCategory(selectedOutfit, "tops").map(
                         (item, index) => (
                           <div key={index} className="space-y-2">
@@ -558,7 +562,7 @@ export const OutfitGrid = () => {
                   </TabsContent>
 
                   <TabsContent value="bottoms" className="mt-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                       {getItemsByCategory(selectedOutfit, "bottoms").map(
                         (item, index) => (
                           <div key={index} className="space-y-2">
@@ -600,7 +604,7 @@ export const OutfitGrid = () => {
                   </TabsContent>
 
                   <TabsContent value="accessories" className="mt-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                       {getItemsByCategory(selectedOutfit, "accessories").map(
                         (item, index) => (
                           <div key={index} className="space-y-2">

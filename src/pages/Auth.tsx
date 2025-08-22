@@ -104,7 +104,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const redirectUrl = `${window.location.origin}/app`;
+      const redirectUrl = "https://styleincheck.vercel.app/app";
 
       const { error } = await supabase.auth.signUp({
         email: formData.email,

@@ -28,13 +28,23 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface ProfileSettingsDialogProps {
   children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ProfileSettingsDialog({
   children,
+  open: controlledOpen,
+  onOpenChange,
 }: ProfileSettingsDialogProps) {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? (controlledOpen as boolean) : uncontrolledOpen;
+  const handleOpenChange = (value: boolean) => {
+    if (!isControlled) setUncontrolledOpen(value);
+    if (onOpenChange) onOpenChange(value);
+  };
   const [displayName, setDisplayName] = useState("");
   const [updatingName, setUpdatingName] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
@@ -72,7 +82,7 @@ export function ProfileSettingsDialog({
     if (!user?.email) return;
     setSendingReset(true);
     try {
-      const redirectTo = `${window.location.origin}/auth`;
+      const redirectTo = "https://styleincheck.vercel.app/auth";
       const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
         redirectTo,
       });
@@ -124,9 +134,9 @@ export function ProfileSettingsDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-[95vw] sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Profile Settings</DialogTitle>
           <DialogDescription>
@@ -142,7 +152,7 @@ export function ProfileSettingsDialog({
 
           <div className="space-y-3">
             <Label htmlFor="displayName">Display Name</Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="displayName"
                 value={displayName}
@@ -159,7 +169,7 @@ export function ProfileSettingsDialog({
 
           <div className="space-y-3">
             <Label>Reset Password</Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 variant="outline"
                 onClick={handleSendPasswordReset}
@@ -172,7 +182,7 @@ export function ProfileSettingsDialog({
 
           <div className="space-y-3">
             <Label htmlFor="newPassword">Change Password</Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="newPassword"
                 type="password"

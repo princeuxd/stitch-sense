@@ -18,7 +18,8 @@ const initialMessages: Message[] = [
   {
     id: "1",
     type: "assistant",
-    content: "Hi! I'm your AI stylist assistant. I can help you create outfits, suggest combinations, or answer questions about your wardrobe. What would you like to explore today?",
+    content:
+      "Hi! I'm your AI stylist assistant. I can help you create outfits, suggest combinations, or answer questions about your wardrobe. What would you like to explore today?",
     timestamp: new Date(),
     suggestions: [
       "What should I wear to a business meeting?",
@@ -51,7 +52,7 @@ export function ChatInterface() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
@@ -64,26 +65,26 @@ export function ChatInterface() {
         timestamp: new Date(),
         suggestions: generateSuggestions(content),
       };
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
       setIsLoading(false);
     }, 1500);
   };
 
   const generateMockResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
-    
+
     if (message.includes("business") || message.includes("meeting")) {
       return "For a business meeting, I'd recommend your Classic White Blouse paired with dark tailored pants or a blazer. This creates a professional, polished look that's perfect for important meetings. The white blouse is versatile and always looks crisp and confident.";
     }
-    
+
     if (message.includes("casual") || message.includes("weekend")) {
       return "For a casual weekend look, try your Dark Wash Jeans with a comfortable top. You could layer with a cardigan or light jacket depending on the weather. This combination is both stylish and comfortable for errands, coffee dates, or relaxing at home.";
     }
-    
+
     if (message.includes("rainy") || message.includes("weather")) {
       return "For rainy weather, choose darker colors that won't show water spots as easily. I'd suggest waterproof footwear and a light jacket that you can easily layer. Your darker pieces would work well - they're practical and still stylish for gloomy days.";
     }
-    
+
     return "I'd be happy to help you create the perfect outfit! Based on your wardrobe, I can suggest several great combinations. Could you tell me more about the occasion or your style preferences for today?";
   };
 
@@ -101,7 +102,7 @@ export function ChatInterface() {
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-4xl mx-auto">
+    <div className="flex flex-col h-[70vh] sm:h-[600px] max-w-full sm:max-w-4xl mx-auto w-full">
       <Card className="card-fashion p-6 flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
@@ -110,13 +111,17 @@ export function ChatInterface() {
           </div>
           <div>
             <h2 className="text-xl font-semibold">AI Style Assistant</h2>
-            <p className="text-sm text-muted-foreground">Your personal fashion consultant</p>
+            <p className="text-sm text-muted-foreground">
+              Your personal fashion consultant
+            </p>
           </div>
         </div>
 
         {/* Quick Prompts */}
         <div className="flex flex-wrap gap-2 mb-4">
-          <span className="text-sm text-muted-foreground mr-2">Quick ideas:</span>
+          <span className="text-sm text-muted-foreground mr-2">
+            Quick ideas:
+          </span>
           {quickPrompts.map((prompt) => (
             <Badge
               key={prompt}
@@ -144,9 +149,9 @@ export function ChatInterface() {
                     <Bot className="h-4 w-4 text-white" />
                   </div>
                 )}
-                
+
                 <div
-                  className={`max-w-[80%] space-y-2 ${
+                  className={`max-w-[85%] sm:max-w-[80%] space-y-2 ${
                     message.type === "user" ? "text-right" : "text-left"
                   }`}
                 >
@@ -159,7 +164,7 @@ export function ChatInterface() {
                   >
                     <p className="text-sm">{message.content}</p>
                   </div>
-                  
+
                   {message.suggestions && (
                     <div className="flex flex-wrap gap-1">
                       {message.suggestions.map((suggestion, index) => (
@@ -174,11 +179,11 @@ export function ChatInterface() {
                       ))}
                     </div>
                   )}
-                  
+
                   <p className="text-xs text-muted-foreground">
-                    {message.timestamp.toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    {message.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
@@ -190,7 +195,7 @@ export function ChatInterface() {
                 )}
               </div>
             ))}
-            
+
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-accent flex items-center justify-center flex-shrink-0">
@@ -199,8 +204,14 @@ export function ChatInterface() {
                 <div className="bg-muted p-3 rounded-lg">
                   <div className="flex space-x-1">
                     <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                    <div
+                      className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
                   </div>
                 </div>
               </div>
